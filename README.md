@@ -35,4 +35,5 @@ Open **http://127.0.0.1:4317** (or the URL printed at startup). Browse the repor
 
 - Both processes use `~/.papercuts/reports.sqlite` by default. To isolate a run, set `PAPERCUTS_DATA_DIR` to the same absolute path in the environments that launch Claude Code and the dashboard. Use a private directory outside the Git checkout. The SQLite file is local plaintext, so restrict who can access the directory and its backups.
 - Set `PAPERCUTS_PORT` before starting the dashboard to use a different port. The service does not need a GitHub token or a network connection after installation.
-- Run `npm test` for automated tests. To try the local plugin without installing it, run `claude --plugin-dir .` from the source checkout.
+- Run `npm test` for automated tests; no npm install or browser is required. To try the local plugin without installing it, run `claude --plugin-dir .` from the source checkout.
+- For the browser regression test, run `npm ci`, `npx playwright install --only-shell chromium` (add `--with-deps` on Linux if system libraries are missing), then `npm run test:browser`. CI runs it on Linux with synthetic data and a temporary loopback dashboard.
