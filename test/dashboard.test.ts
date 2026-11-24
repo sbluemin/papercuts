@@ -44,7 +44,7 @@ describe('dashboard', () => {
     const clock = mock.timers;
     clock.enable({ apis: ['Date'], now: Date.UTC(2026, 0, 1) });
     try {
-      ids.xss = store.create({ tool: '<img src=x onerror=alert(1)>', kind: 'failure', summary: '<script>alert("s")</script> & "quoted"', details: '</pre><script>alert(2)</script>‮evil\u0000end\nsecond line' }).id;
+      ids.xss = store.create({ tool: '<img src=x onerror=alert(1)>', kind: 'failure', summary: '<script>alert("s")</script> & "quoted"', details: '</pre><script>alert(2)</script>‮evil\u0001end\nsecond line' }).id;
       clock.tick(1);
       ids.plain = store.create({ tool: 'Computer controls', kind: 'confusing', summary: 'Click result gave no hint', details: undefined }).id;
     } finally {
@@ -118,7 +118,7 @@ describe('dashboard', () => {
     assert.equal(res.status, 200);
     assert.ok(!res.body.includes('<script'));
     assert.ok(res.body.includes('&lt;/pre&gt;&lt;script&gt;alert(2)&lt;/script&gt;'));
-    assert.ok(!/[‪-‮\u0000]/.test(res.body));
+    assert.ok(!/[‪-‮\u0001]/.test(res.body));
     assert.ok(res.body.includes('second line'));
     assert.match(res.body, /data-status="new"/);
   });
@@ -146,6 +146,7 @@ describe('dashboard', () => {
       const res = await raw(`${base}/`, { headers: { host } });
       assert.equal(res.status, 403, `host=${host}`);
       assert.ok(!res.body.includes('Click result'));
+      assert.ok(!res.body.includes('synthetic test data'));
     }
     assert.equal((await raw(`${base}/`, { headers: { host: `localhost:${dash.port}` } })).status, 200);
   });

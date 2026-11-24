@@ -267,9 +267,11 @@ export async function startDashboard(options: DashboardOptions): Promise<Dashboa
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     // DNS-rebinding guard: only our own loopback names on our own port.
     const host = (req.headers.host ?? '').toLowerCase();
-    if (host !== `127.0.0.1:${boundPort}` && host !== `localhost:${boundPort}`) {
-      return fail(req, res, 403, 'Wrong address', `Open the dashboard at http://127.0.0.1:${boundPort}/ to use it.`);
+    const localNames = ['127.0.0.1', 'localhost'];
+    if (!localNames.some(name => host === `${name}:${boundPort}` || (boundPort === 80 && host === name))) {
+      return send(req, res, 403, 'Open the dashboard using its local loopback URL.', 'text/plain; charset=utf-8');
     }
+    const ownOrigin = new URL(`http://${host}`).origin;
     const method = req.method ?? 'GET';
     const url = new URL(req.url ?? '/', `http://${host}`);
     const path = url.pathname;
@@ -290,7 +292,7 @@ export async function startDashboard(options: DashboardOptions): Promise<Dashboa
       const page = pageParam ? Number(pageParam) : 1;
       if (page > MAX_PAGE) return fail(req, res, 400, 'Unknown page', 'That page is out of range.');
       const { rows, hasMore } = pageOf(store, status, page);
-      return send(req, res, 200, renderList(rows, status, page, hasMore, dataLabel));
+      return send(req, res, 200, renderList(rows, status, page, hasMore && page < MAX_PAGE, dataLabel));
     }
 
     if (reportMatch) {
@@ -308,7 +310,7 @@ export async function startDashboard(options: DashboardOptions): Promise<Dashboa
       const origin = req.headers.origin;
       const site = req.headers['sec-fetch-site'];
       const refuse = (why: string) => fail(req, res, 403, 'Request refused', `${why} Reload the report from the dashboard and try again.`);
-      if (origin !== `http://${host}`) return refuse('The request did not come from this dashboard.');
+      if (origin !== ownOrigin) return refuse('The request did not come from this dashboard.');
       if (site !== undefined && site !== 'same-origin') return refuse('The request came from another site.');
       if (!/^application\/x-www-form-urlencoded(?:\s*;|$)/i.test(req.headers['content-type'] ?? '')) return fail(req, res, 415, 'Unsupported request', 'Use the status buttons on the report page.');
       const declared = Number(req.headers['content-length'] ?? 0);
