@@ -3,10 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=24.12.0" },
+  "engines": {
+    "node": ">=24.12.0"
+  },
   "scripts": {
     "test": "node --test",
+    "test:browser": "node --test browser-tests/dashboard.ts",
     "dashboard": "node src/dashboard.ts",
     "mcp": "node src/mcp.ts"
+  },
+  "devDependencies": {
+    "playwright": "1.65.1"
   }
 }
