@@ -1,0 +1,6 @@
+{
+  "name": "papercuts",
+  "version": "0.1.0",
+  "author": { "name": "Papercuts contributors" },
+  "description": "Record manually requested tool friction reports in a local SQLite database."
+}

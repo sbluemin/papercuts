@@ -1,0 +1,12 @@
+{
+  "name": "papercuts",
+  "owner": { "name": "Papercuts" },
+  "metadata": { "description": "The Papercuts plugin for recording tool friction locally." },
+  "plugins": [
+    {
+      "name": "papercuts",
+      "source": "./",
+      "description": "Record manually requested tool friction reports in a local SQLite database."
+    }
+  ]
+}
